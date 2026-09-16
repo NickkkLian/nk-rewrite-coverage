@@ -14,6 +14,8 @@ reasoning chains compressed into one, a timetable, five verbatim quotations, a p
 cross-reference section, six whole blocks. Nothing in the new text said anything was missing. The parts
 that vanish are exactly the ones a reader needs to check or reuse the work.
 
+> **Paths.** Commands in this skill start with `${…SKILL_DIR}`: this skill's own folder, the one that contains this SKILL.md. Claude Code fills it in. If your agent shows the placeholder as written (Codex, Cursor, Gemini CLI and others), replace it with that folder's absolute path before you run the command. Left as it is, it expands to nothing and the path breaks.
+
 ## When this applies
 
 - The new file replaced the old one instead of patching it (an agent "cleaned up", "restructured",
