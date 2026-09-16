@@ -1,0 +1,19 @@
+{
+  "name": "nk-rewrite-coverage",
+  "description": "After rewriting a long document \u2014 a spec, a research report, a handbook \u2014 list what the old version had that the new one no longer mentions, and account for every item with a three-state verdict before the rewrite is accepted.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Nick Lian",
+    "url": "https://github.com/NickkkLian"
+  },
+  "homepage": "https://github.com/NickkkLian/nk-rewrite-coverage",
+  "repository": "https://github.com/NickkkLian/nk-rewrite-coverage",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "agent-skills",
+    "documents",
+    "rewrite",
+    "coverage"
+  ]
+}
