@@ -108,6 +108,7 @@ assertion, without a traceback; the unmutated control stayed green.
 ## Limits
 
 - Content moved to the wrong section (the words exist, the place is wrong).
+- A change in any other cell of a table row: each row is compared by one cell, the first, or the second when the first column only counts the rows (1, 2, 3 … in order). Codes and ids in a first column (200, #123) are compared as they are.
 - Quotations that are no longer verbatim — compare those against the source, not against the old draft.
 - A new file that is complete and wrong.
 - Truncation of the new file is hinted by the character ratio only; confirm the file ends where it should.

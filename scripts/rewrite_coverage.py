@@ -5,7 +5,9 @@ mentions, and require a three-state ledger for each item. A percentage is not th
     python3 rewrite_coverage.py <old.md> <new.md> [--min-len 3] [--ledger LEDGER.md] [--out unaccounted.md]
     python3 rewrite_coverage.py --selftest
 
-What it extracts from the old document: headings, bold terms (**…**), and the first cell of every table row.
+What it extracts from the old document: headings, bold terms (**…**), and one cell per table row: the first, or the
+second when the table's first column only counts its rows (1, 2, 3 … in order). A first column of codes or ids
+(200, 404, #123) is not a count, so it is compared as it is.
 An item is "unaccounted" when its normalised text does not occur anywhere in the new document. The list is the
 product: every line on it needs a human verdict in the ledger, one of
     [renamed]   the same content under other words        [merged]   folded into another section
@@ -15,12 +17,14 @@ exit code is 1 whenever the list is non-empty — "there is work to do", not "th
 Structure hints (headings / table rows / quote lines / non-space characters, old vs new) flag two failure shapes the
 existence test cannot see: a term dump (all the words, none of the structure) and a truncated new file (the new
 text is far shorter). Hints are printed, never scored. What it cannot see: content moved to the wrong section;
-quotations that are no longer verbatim; a new file that is complete but wrong.
+quotations that are no longer verbatim; a new file that is complete but wrong; a change in any other cell of a table
+row (each row is compared by one cell).
 """
 import os, re, sys, tempfile
 
 PUNCT = re.compile(r"[\s*＋+：:～~「」『』\"“”（）()【】\[\]、，,。.／/·⭐⚠️✅❌〔〕=＝→>＞<＜|｜~\-`_]")
 TAGS = ("[renamed]", "[merged]", "[restored]", "[dropped]")
+ROWNUM = re.compile(r"^(\d{1,4})[.)]?$")           # a count cell: 1, 2., 3)
 
 
 def norm(s):
@@ -33,11 +37,40 @@ def items(old, min_len):
         out.setdefault(m.group(1).strip(), "heading")
     for m in re.finditer(r"\*\*(.+?)\*\*", old):
         out.setdefault(m.group(1).strip(), "bold")
-    for m in re.finditer(r"^\|\s*([^|\n]+?)\s*\|", old, re.M):
-        cell = m.group(1).strip().strip("*_` ")
-        if cell and not set(cell) <= set("-: "):
-            out.setdefault(cell, "table-cell")
+    for block in table_blocks(old):
+        rows = [[c.strip().strip("*_` ") for c in line.strip().strip("|").split("|")] for line in block]
+        sep = next((i for i, r in enumerate(rows) if all(set(c) <= set("-: ") for c in r)), None)
+        body = rows[sep + 1:] if sep is not None else rows
+        skip = counts_rows(body)                         # the first column is 1, 2, 3 …: compare the next cell instead
+        for i, cells in enumerate(rows):
+            if i == sep:
+                continue
+            cell = cells[1] if skip and len(cells) > 1 else cells[0]
+            if cell and not set(cell) <= set("-: "):
+                out.setdefault(cell, "table-cell")
     return {k: v for k, v in out.items() if len(norm(k)) >= max(2, min_len)}
+
+
+def table_blocks(text):
+    """Runs of consecutive lines that start with a pipe and hold a second one."""
+    block = []
+    for line in text.splitlines() + [""]:
+        if re.match(r"^\|[^|]*\|", line):
+            block.append(line)
+        elif block:
+            yield block
+            block = []
+
+
+def counts_rows(body):
+    """True when every body row starts with a number and the numbers count up by one from 0 or 1."""
+    nums = []
+    for cells in body:
+        m = ROWNUM.match(cells[0]) if cells else None
+        if not m:
+            return False
+        nums.append(int(m.group(1)))
+    return bool(nums) and nums[0] in (0, 1) and all(b == a + 1 for a, b in zip(nums, nums[1:]))
 
 
 def structure(text):
@@ -107,6 +140,17 @@ The **frobnicator** needs a **cold start** every time.
 ## Caveats
 Only on **weekdays**.
 """
+NUMBERED_OLD = """## Rules
+| # | Rule | Why |
+|---|---|---|
+| 1 | Keep one token file | cheapest consistency |
+| 2 | Totals are computed on the page | a typed total can drift |
+"""
+NUMBERED_NEW = NUMBERED_OLD.replace("Totals are computed on the page", "Totals may be typed in")
+NO_TRAILING_PIPE = "| name | value\n|---|---\n| latency | 3 ms\n"
+CODES_OLD = "| code | meaning |\n|---|---|\n| 200 | OK |\n| 404 | Not found |\n"
+CODES_NEW = "| code | meaning |\n|---|---|\n| 404 | Not found |\n"
+
 NEW = """# Title
 ## Setup
 The frobnicator needs a cold start every time.
@@ -151,6 +195,13 @@ def selftest():
         chk(rc == 0 and any("term dump" in x for x in out), "a term dump passes the existence test but prints the structure hint (the known limit)")
         rc, out = report(o, o)
         chk(rc == 2, "old == new file → exit 2 (a meaningless 100%)")
+        its2, un2, _, _ = coverage(NUMBERED_OLD, NUMBERED_NEW)
+        chk([k for k, _ in un2] == ["Totals are computed on the page"] and "Keep one token file" in its2,
+            f"a numbered table's rule text is compared, not its row number: {[k for k, _ in un2]}")
+        its4, un4, _, _ = coverage(CODES_OLD, CODES_NEW)
+        chk([k for k, _ in un4] == ["200"], f"a first column of codes is not a row count: deleting the 200 row is reported ({[k for k, _ in un4]})")
+        its3, un3, _, _ = coverage(NO_TRAILING_PIPE, "nothing here")
+        chk({k for k, _ in un3} == {"name", "latency"}, f"rows without a closing pipe are still read: {sorted(k for k, _ in un3)}")
     return ok, lines
 
 
