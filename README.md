@@ -26,6 +26,14 @@ The full procedure, the boundaries and where the rules came from are in [SKILL.m
 5. `rewrite_coverage.py old.md new.md --ledger ledger.md` exits 0 only when every item has a tag
 6. Anything tagged `[restored]`
 
+## Why it is built this way
+
+**The idea.** A rewrite is a retelling from memory, and memory keeps conclusions and drops process. A 630-line analysis rewritten after a context compaction came back as 755 lines that read fine — and had lost eight reasoning chains compressed into one, a timetable, five verbatim quotations, a placement table and a cross-reference section, six whole blocks.
+
+**Where it came from.** Own practice, 2026-08: the compaction rewrite described above, followed by four rounds of an auditor breaking the first version of this tool (a positive probe that was always true; a percentage that a term dump could game; a truncated file that still scored mid-range).
+
+**Evidence.** What was broken on purpose to show that the self-tests can fail is under [Verify](#verify); what was run end to end, and in which agent, is under [Compatibility](#compatibility).
+
 ## Install
 
 Pick one of four ways: three for Claude Code, one for OpenAI Codex. Skills load when a session starts, so open a **new** session after installing.
