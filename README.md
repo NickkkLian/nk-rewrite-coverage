@@ -1,13 +1,52 @@
 # nk-rewrite-coverage
 
-![nk-rewrite-coverage](https://raw.githubusercontent.com/NickkkLian/nickkk-skills/main/gallery/social/nk-rewrite-coverage.png)
-
 An agent skill for [Claude Code](https://code.claude.com) and [OpenAI Codex](https://developers.openai.com/codex). After rewriting a long document — a spec, a research report, a handbook — list what the old version had that the new one no longer mentions, and account for every item with a three-state verdict before the rewrite is accepted.
+
+**What you get.** One real run of nk-rewrite-coverage 0.1.2, copied from the terminal on 2026-09-30:
+
+```text
+$ python3 scripts/rewrite_coverage.py demo/old.md demo/new.md
+old: 4 items (headings, bold terms, table cells) · unaccounted in new: 2
+structure  headings 3→2  table_rows 0→0  quote_lines 0→0  chars 57→24
+⚠️ new text has 42% of the old characters — check for truncation before anything else
+  [      ] heading    Risks
+  [      ] bold       rollback window
+✘ 2 unaccounted item(s) without a verdict — decide each: [renamed], [merged], [restored], [dropped]
+```
+
+![nk-rewrite-coverage](https://raw.githubusercontent.com/NickkkLian/nickkk-skills/main/gallery/social/nk-rewrite-coverage.png)
 
 Part of [nickkk-skills](https://github.com/NickkkLian/nickkk-skills) — skills that stop an AI coding agent's
 "done, tested, safe" from being taken on faith.
 
+## Try it
+
+Nothing is installed and nothing under `~/.claude` changes: clone, run the self-test, run the example (it only writes inside the clone).
+
+```bash
+git clone https://github.com/NickkkLian/nk-rewrite-coverage && cd nk-rewrite-coverage
+python3 scripts/rewrite_coverage.py --selftest
+mkdir -p demo
+printf '# Plan\n\n## Risks\n\n**rollback window** is 2 hours\n\n## Costs\n\nabout 40 hours\n' > demo/old.md
+printf '# Plan\n\n## Costs\n\nabout 40 hours\n' > demo/new.md
+python3 scripts/rewrite_coverage.py demo/old.md demo/new.md
+```
+
+The self-test prints:
+
+```text
+rewrite_coverage selftest · 12/12 passed
+```
+
+The last command prints the block at the top of this page; its last line is the one below, and its exit code is 1 (non-zero on purpose: it found something).
+
+```text
+✘ 2 unaccounted item(s) without a verdict — decide each: [renamed], [merged], [restored], [dropped]
+```
+
 ![nk-rewrite-coverage demo: before and after](https://raw.githubusercontent.com/NickkkLian/nickkk-skills/main/gallery/nk-rewrite-coverage.gif)
+
+The demo above is a rendering of an earlier run and cuts its longest lines short; the block at the top of this page is a full run of this version.
 
 ## What it does
 
@@ -19,12 +58,12 @@ The full procedure, the boundaries and where the rules came from are in [SKILL.m
 
 ## How it works
 
-1. Keep the old version (git has it: `git show HEAD:path > /tmp/old.md`)
-2. `python3 scripts/rewrite_coverage.py old.md new.md --out unaccounted.md` prints every heading, bold term and table cell…
-3. Read the hints first
-4. Give every unaccounted item one verdict
-5. `rewrite_coverage.py old.md new.md --ledger ledger.md` exits 0 only when every item has a tag
-6. Anything tagged `[restored]`
+1. Keep the old version (git has it: `git show HEAD:path > /tmp/old.md`).
+2. `python3 scripts/rewrite_coverage.py old.md new.md --out unaccounted.md` prints every heading, bold term and table cell of the old text that does not occur in the new, plus structure hints (headings / table rows / quote lines / character count, old → new).
+3. Read the hints first. New text under 60% of the old characters: check for truncation before anything else.
+4. Give every unaccounted item one verdict in a ledger file (one line each, the item text followed by a tag).
+5. `rewrite_coverage.py old.md new.md --ledger ledger.md` exits 0 only when every item has a tag.
+6. Anything tagged `[restored]`: restore it verbatim from the old file, not from memory.
 
 ## Why it is built this way
 
@@ -111,9 +150,14 @@ In this skill's Codex run, every call into the skill folder's scripts/ used that
 python3 scripts/rewrite_coverage.py --selftest
 ```
 
-Standard library only, Python 3.9+. Before publishing, the guarded lines of each script were
-mutated one at a time in a sandbox copy and the self-test was confirmed to go red on the named
-assertion, without a traceback; the unmutated control stayed green.
+Standard library only, Python 3.9+. On 2026-09-30 every self-test above passed, and
+`breakcheck.py` from [nk-breakable-selftest](https://github.com/NickkkLian/nk-breakable-selftest) broke each script on purpose in a sandbox copy:
+
+- `rewrite_coverage.py`: the one line the pattern matches is not covered: switching off L128 crashed the script instead of failing a sample, which does not count as caught.
+
+The unmutated control stayed green every time. Only lines that record a finding, raise, or return a failing exit code
+were broken (the tool's pattern, or the hand-written list); a line number refers to the script as shipped in this version.
+This shows those lines are covered. It does not show that nothing else can fail.
 
 ## Limits
 
