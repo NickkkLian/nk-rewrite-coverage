@@ -638,10 +638,10 @@ def read_text(path):
 CSS = '''
 :root{color-scheme:light dark}*{box-sizing:border-box}
 body{margin:0;font:16px/1.5 system-ui,sans-serif}
-.shell{--ink:#24302e;--muted:#64716c;--line:#dbe3dd;--paper:#fff;--bg:#f3f5f0;--accent:#315f50;--mark:#e4edd2;--fewer:#f6e7be;background:var(--bg);color:var(--ink);min-height:100vh;padding:28px max(16px,calc((100vw - 1120px)/2)) 48px}
-@media(prefers-color-scheme:dark){.shell{--ink:#e5ede8;--muted:#afbeb4;--line:#43544a;--paper:#202b26;--bg:#16201b;--accent:#b1d8c3;--mark:#455b32;--fewer:#635329}}
-#dark:checked~.shell{--ink:#e5ede8;--muted:#afbeb4;--line:#43544a;--paper:#202b26;--bg:#16201b;--accent:#b1d8c3;--mark:#455b32;--fewer:#635329;color-scheme:dark}
-#light:checked~.shell{--ink:#24302e;--muted:#64716c;--line:#dbe3dd;--paper:#fff;--bg:#f3f5f0;--accent:#315f50;--mark:#e4edd2;--fewer:#f6e7be;color-scheme:light}
+.shell{--ink:#24302e;--muted:#64716c;--line:#dbe3dd;--paper:#fff;--bg:#f3f5f0;--accent:#315f50;--mark:#a93920;--on-mark:#f9f6ee;--fewer:#f6e7be;--fewer-line:#7e5800;background:var(--bg);color:var(--ink);min-height:100vh;padding:28px max(16px,calc((100vw - 1120px)/2)) 48px}
+@media(prefers-color-scheme:dark){.shell{--ink:#e5ede8;--muted:#afbeb4;--line:#43544a;--paper:#202b26;--bg:#16201b;--accent:#b1d8c3;--mark:#da7b66;--on-mark:#0d0c12;--fewer:#635329;--fewer-line:#d9ad60}}
+#dark:checked~.shell{--ink:#e5ede8;--muted:#afbeb4;--line:#43544a;--paper:#202b26;--bg:#16201b;--accent:#b1d8c3;--mark:#da7b66;--on-mark:#0d0c12;--fewer:#635329;--fewer-line:#d9ad60;color-scheme:dark}
+#light:checked~.shell{--ink:#24302e;--muted:#64716c;--line:#dbe3dd;--paper:#fff;--bg:#f3f5f0;--accent:#315f50;--mark:#a93920;--on-mark:#f9f6ee;--fewer:#f6e7be;--fewer-line:#7e5800;color-scheme:light}
 .theme-input{position:absolute;width:1px;height:1px;clip-path:inset(50%)}
 .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
@@ -656,7 +656,7 @@ a{color:var(--accent);text-underline-offset:3px}a:focus-visible{outline:2px soli
 .stat{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--paper)}.stat strong{display:block}.stat span{font-size:13px;color:var(--muted)}
 .documents{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.document{min-width:0}.document+.document{border-left:1px solid var(--line);padding-left:24px}
 pre{font:15px/1.65 ui-monospace,monospace;white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 0;tab-size:4}
-mark{background:var(--mark);color:var(--ink);box-decoration-break:clone}mark.fewer{background:var(--fewer)}.source-anchor{scroll-margin-top:24px}.source-anchor:target+mark{outline:2px solid var(--accent)}
+mark{background:var(--mark);color:var(--on-mark);border-bottom:2px solid var(--ink);-webkit-box-decoration-break:clone;box-decoration-break:clone;-webkit-print-color-adjust:exact;print-color-adjust:exact}mark.fewer{background:var(--fewer);color:var(--ink);border-bottom:2px dashed var(--fewer-line)}.source-anchor{scroll-margin-top:24px}.source-anchor:target+mark{outline:2px solid var(--accent)}
 .group{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}.group li{margin:10px 0}.value{white-space:pre-wrap;overflow-wrap:anywhere}.badge{font-size:12px;font-weight:650;margin-right:7px;color:var(--accent)}
 nav{display:flex;gap:18px;flex-wrap:wrap;margin:16px 0}.structure{font-size:13px;color:var(--muted);overflow-wrap:anywhere}.shell,p,li{overflow-wrap:anywhere}
 @media(max-width:600px){.shell{padding:19px 16px 40px}h1{font-size:24px}.coverage{font-size:17px}.card{padding:13px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.documents{grid-template-columns:minmax(0,1fr);gap:17px}.document+.document{border-left:0;border-top:1px solid var(--line);padding:17px 0 0}pre{font-size:14px}}
@@ -719,7 +719,7 @@ def render_html(data, old, new):
         loc = first['locations'][0]
         bits.append(f'<article class="card"><h3>First item to check · {esc(first["kind"])} · {first["status"]}</h3>'
                     f'<p class="location">Old line {loc["line"]}, column {loc["column"]} · {first["old_count"]} before → {first["new_count"]} after</p>'
-                    f'<p class="preview"><mark>{esc(first["value"])}</mark></p>'
+                    f'<p class="preview"><mark{" class=" + chr(34) + "fewer" + chr(34) if first["status"] == "fewer" else ""}>{esc(first["value"])}</mark></p>'
                     f'<a href="#{first["id"]}-1">See its place in the old text</a></article>')
     else:
         bits.append('<p class="card">Every extracted item is kept; this does not prove the rewrite is complete or correct.</p>')
@@ -749,7 +749,7 @@ def render_html(data, old, new):
         bits.append('<p>No lost or fewer items were found.</p>')
     bits.append('</section><h2>Both documents</h2><div class="card documents">')
     bits.append(f'<section class="document" id="old"><h3>Old text · {esc(data["old_file"])}</h3>'
-                '<p class="location">Green: lost · amber: fewer (all old occurrences).</p>'
+                '<p class="location">Red with a solid underline: lost · amber with a dashed underline: fewer (all old occurrences).</p>'
                 f'<pre>{marked_source(old, data["items"])}</pre></section>')
     bits.append(f'<section class="document" id="new"><h3>New text · {esc(data["new_file"])}</h3><pre>{esc(new)}</pre></section></div>')
     bits.append('<footer>Local UTF-8 text comparison. No outside requests. Counts are evidence to review, not a quality score.</footer></main></body></html>')
