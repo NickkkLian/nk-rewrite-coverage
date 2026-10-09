@@ -24,6 +24,10 @@ structure  headings 7→7  table_rows 4→3  quote_lines 0→0  chars 2878→248
 Report: demo/report.html
 ```
 
+The report page that run wrote shows the old text with each lost item marked where it stood. This is one paragraph of it: three numbers, a bold term and a link that the rewrite dropped. The dark strip under it quotes the "lost" part of the run's first line and is not part of the page.
+
+![nk-rewrite-coverage: one paragraph of the old text with 1,250, 73, 19%, a bold term and a link marked in red where the rewrite dropped them](https://raw.githubusercontent.com/NickkkLian/nickkk-skills/main/gallery/results/nk-rewrite-coverage.png)
+
 **Measured, not guaranteed.** Three blind trials used six invented document pairs, with the losses listed by hand before each run.
 On the two pairs this version had never seen, 35 items were really lost or appeared fewer times: it reported 34 of them, and 3 that were not lost.
 Three of those four errors were names, the least certain kind.
@@ -56,9 +60,9 @@ The last command prints the block at the top of this page; its last line is the 
 Report: demo/report.html
 ```
 
-![nk-rewrite-coverage demo: before and after](https://raw.githubusercontent.com/NickkkLian/nickkk-skills/main/gallery/nk-rewrite-coverage.gif)
+![nk-rewrite-coverage demo: one run in the terminal, then its report page with each lost item marked in the old text](https://raw.githubusercontent.com/NickkkLian/nickkk-skills/main/gallery/nk-rewrite-coverage.gif)
 
-The demo above is a rendering of an earlier run and cuts its longest lines short; the block at the top of this page is a full run of this version.
+The demo above is drawn from a run of 0.2.2 on the bundled example, the same command as at the top of this page. The terminal part shows the run's item lines and its last line, and leaves out the six lines between the command and the first item, most of them too long for the frame. The page part is the report that run wrote, `demo/report.html`, in headless Chrome at 728 wide, light appearance: its first screen, the list of lost and fewer items, then the old text with lost items in red and fewer items in amber beside the new text.
 
 ## What it does
 
