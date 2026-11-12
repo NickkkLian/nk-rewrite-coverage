@@ -2,7 +2,7 @@
 
 An agent skill for [Claude Code](https://code.claude.com) and [OpenAI Codex](https://developers.openai.com/codex). Check what a document rewrite lost.
 
-**What you get.** One real run of nk-rewrite-coverage 0.2.2, copied from the terminal on 2026-10-09:
+**What you get** (a real run): every number, link, code item and quoted string the rewrite dropped or kept fewer times, each with where it stood in the old text.
 
 ```text
 $ python3 scripts/rewrite_coverage.py examples/english-old.md examples/english-new.md --html demo/report.html
@@ -28,31 +28,24 @@ The report page that run wrote shows the old text with each lost item marked whe
 
 ![nk-rewrite-coverage: one paragraph of the old text with 1,250, 73, 19%, a bold term and a link marked in red where the rewrite dropped them](https://raw.githubusercontent.com/NickkkLian/nickkk-skills/main/gallery/results/nk-rewrite-coverage.png)
 
-**Measured, not guaranteed.** Three blind trials used six invented document pairs, with the losses listed by hand before each run.
-On the two pairs this version had never seen, 35 items were really lost or appeared fewer times: it reported 34 of them, and 3 that were not lost.
-Three of those four errors were names, the least certain kind.
+**On two document pairs it had never seen, 35 items were really lost or appeared fewer times: it reported 34 of them**, and 3 that were not lost.
+Three of those four errors were names, the least certain kind. (Three blind trials used six invented document pairs, with the losses listed by hand before each run.)
 
 ![nk-rewrite-coverage](https://raw.githubusercontent.com/NickkkLian/nickkk-skills/main/gallery/social/nk-rewrite-coverage.png)
 
-Part of [nickkk-skills](https://github.com/NickkkLian/nickkk-skills) — skills that stop an AI coding agent's
-"done, tested, safe" from being taken on faith.
+Part of [nickkk-skills](https://github.com/NickkkLian/nickkk-skills): 14 agent skills that work with numbers, check an agent's work, guard a repository, and write and present.
 
 ## Try it
 
-Nothing is installed and nothing under `~/.claude` changes: clone, run the self-test, run the example (it only writes inside the clone).
+Clone and run the example (it only writes inside the clone):
 
 ```bash
 git clone https://github.com/NickkkLian/nk-rewrite-coverage && cd nk-rewrite-coverage
-python3 scripts/rewrite_coverage.py --selftest
 mkdir -p demo
 python3 scripts/rewrite_coverage.py examples/english-old.md examples/english-new.md --html demo/report.html
 ```
 
-The self-test prints:
-
-```text
-rewrite_coverage selftest · 161/161 passed
-```
+None of this installs anything or changes `~/.claude`.
 
 The last command prints the block at the top of this page; its last line is the one below, and its exit code is 1 (non-zero on purpose: it found something).
 
@@ -170,8 +163,16 @@ In this skill's Codex run, every call into the skill folder's scripts/ used that
 python3 scripts/rewrite_coverage.py --selftest
 ```
 
+The self-test prints:
+
+```text
+rewrite_coverage selftest · 161/161 passed
+```
+
+The run at the top of this page is nk-rewrite-coverage 0.2.2, copied from the terminal on 2026-10-09.
+
 Standard library only, Python 3.9+. On 2026-10-09 every self-test above passed, and
-`breakcheck.py` from [nk-breakable-selftest](https://github.com/NickkkLian/nk-breakable-selftest) broke each script on purpose in a sandbox copy:
+a break-check script broke each script on purpose in a sandbox copy:
 
 - `rewrite_coverage.py`: 62 lines broken one at a time; 21 turned the self-test red without a traceback. Not covered: the self-test stayed green with L323, L382, L383, L396, L397, L402, L676, L1400, L1439, L1448, L1455, L1461, L1466, L1473, L1483, L1488, L1489, L1504, L1518, L1532, L1541, L1546, L1554, L1560, L1571, L1572, L1578, L1579, L1601, L1605, L1609, L1613, L1621, L1645, L1647, L1657, L1660, L1662, L1870, L1885 switched off; switching off L121 crashed the script instead of failing a sample, which does not count as caught.
 
