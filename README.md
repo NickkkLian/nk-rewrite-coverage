@@ -47,15 +47,11 @@ python3 scripts/rewrite_coverage.py examples/english-old.md examples/english-new
 
 None of this installs anything or changes `~/.claude`.
 
-The last command prints the block at the top of this page; its last line is the one below, and its exit code is 1 (non-zero on purpose: it found something).
-
-```text
-Report: demo/report.html
-```
+The last command prints the block at the top of this page and exits with code 1 because the rewrite lost items.
 
 ![nk-rewrite-coverage demo: one run in the terminal, then its report page with each lost item marked in the old text](https://raw.githubusercontent.com/NickkkLian/nickkk-skills/main/gallery/nk-rewrite-coverage.gif)
 
-The demo above is drawn from a run of 0.2.2 on the bundled example, the same command as at the top of this page. The terminal part shows the run's item lines and its last line, and leaves out the six lines between the command and the first item, most of them too long for the frame. The page part is the report that run wrote, `demo/report.html`, in headless Chrome at 728 wide, light appearance: its first screen, the list of lost and fewer items, then the old text with lost items in red and fewer items in amber beside the new text.
+The demo above is drawn from a run of 0.2.2 on the bundled example, the same command as at the top of this page. The terminal part leaves out the six lines between the command and the first item, most of them too long for the frame. The page part is the report that run wrote, `demo/report.html`: the list of lost and fewer items, then the old text with lost items in red and fewer items in amber beside the new text.
 
 ## What it does
 
@@ -63,7 +59,7 @@ The demo above is drawn from a run of 0.2.2 on the bundled example, the same com
 - One offline HTML page shows the old text with every lost item marked where it stood and fewer items in amber, a list that links to each place, and the new text beside it. Light and dark; it reads at phone width.
 - Old headings, bold terms and one cell per table row that are missing from the new text are still listed; a ledger of verdicts (`[renamed]` `[merged]` `[restored]` `[dropped]`) annotates them.
 - The exit code is 1 when anything is lost or fewer and 0 when nothing is; `--json` gives every item with its place.
-- Matching is literal. It does not judge rephrased sentences, and what it misses on purpose is listed under Limits.
+- Matching is literal; what it misses on purpose is listed under Limits.
 
 The full procedure, the boundaries and where the rules came from are in [SKILL.md](SKILL.md).
 
@@ -81,8 +77,6 @@ The full procedure, the boundaries and where the rules came from are in [SKILL.m
 **The idea.** A rewrite is a retelling from memory, and memory keeps conclusions and drops process. A 630-line analysis rewritten after a context compaction came back as 755 lines that read fine — and had lost eight reasoning chains compressed into one, a timetable, five verbatim quotations, a placement table and a cross-reference section, six whole blocks.
 
 **Where it came from.** Own practice, 2026-08: the compaction rewrite described above, followed by four rounds of an auditor breaking the first version of this tool (a positive probe that was always true; a percentage that a term dump could game; a truncated file that still scored mid-range).
-
-**Evidence.** What was broken on purpose to show that the self-tests can fail is under [Verify](#verify); what was run end to end, and in which agent, is under [Compatibility](#compatibility).
 
 ## Install
 
@@ -119,7 +113,7 @@ Without opening a session, the same two steps work from a shell: `claude plugin 
 
 <img src="https://raw.githubusercontent.com/NickkkLian/nickkk-skills/main/gallery/panel-route/panel-route.gif" alt="Adding the marketplace and installing a skill in the desktop app" width="640">
 
-<sub>Recorded on 2026-09-16, when the marketplace listed ten skills, all at version 0.1.0; it lists more now. The repository list in this recording shows the recorder's own repositories because a GitHub account is connected; yours will show yours. Type the full name as in step 4.</sub>
+<sub>Recorded on 2026-09-16, when the marketplace listed ten skills; it lists more now. The repository list will show your own repositories.</sub>
 
 1. In the chat box, type `/plugin marketplace` and press Enter (or open **Settings → Customize → Plugins**). The **Plugins** panel opens.
    <br><img src="https://raw.githubusercontent.com/NickkkLian/nickkk-skills/main/gallery/panel-route/step1-type-plugin-marketplace.png" alt="/plugin marketplace typed in the chat box" width="480">
@@ -153,7 +147,7 @@ git clone https://github.com/NickkkLian/nk-rewrite-coverage.git ~/.agents/skills
 | OpenAI Codex CLI (0.154.0-alpha.6.2, gpt-5.6-sol, low reasoning, macOS) | yes | On 2026-10-09 one session on 0.2.2 (Codex CLI 0.162.0-alpha.2, gpt-5.6-sol passed at low effort), with the same request, read SKILL.md and the matching rules, ran the script twice (with `--json` and `--html`) and named all 17 lost or fewer items correctly; it stated no counts, did not say that names are the least certain kind, and put two findings of its own reading in the same list. The rest of this row is a run of version 0.1.x, made on 2026-09-16. Copied into `~/.agents/skills` of a temporary home (the folder route 4 clones into), in a fresh project, without the user's Codex config. From a plain request that never names the skill, Codex read SKILL.md, ran `scripts/rewrite_coverage.py` on the old and new spec, restored the dropped section verbatim, recorded each decision in a ledger and ended with nothing unaccounted. |
 | Cursor, Gemini CLI | no | Not tested. Their documentation says both read `~/.agents/skills`, the folder route 4 clones into; Gemini CLI asks before it activates a skill. |
 
-On 2026-10-09 one plain-request session per agent was run on 0.2.2, one attempt each (the rows above); in both, the report page the session wrote is byte-identical to a direct run of the script on the same two files. Also run on 0.2.2, without an agent: the self-test (161 cases) on Python 3.13 and 3.9, the bundled examples, and the six document pairs of the measurement at the top of this page.
+In both 0.2.2 sessions above (one attempt each), the report page the session wrote is byte-identical to a direct run of the script on the same two files. Also run on 0.2.2, without an agent: the self-test (161 cases) on Python 3.13 and 3.9, the bundled examples, and the six document pairs of the measurement at the top of this page.
 
 In this skill's Codex run, every call into the skill folder's scripts/ used that folder's absolute path. Route 4 was checked for this repository: cloned from GitHub into a temporary home's `~/.agents/skills`, it was listed by the step 3 command. This skill's frontmatter uses only name, description, license and metadata.
 
@@ -177,7 +171,7 @@ a break-check script broke each script on purpose in a sandbox copy:
 - `rewrite_coverage.py`: 62 lines broken one at a time; 21 turned the self-test red without a traceback. Not covered: the self-test stayed green with L323, L382, L383, L396, L397, L402, L676, L1400, L1439, L1448, L1455, L1461, L1466, L1473, L1483, L1488, L1489, L1504, L1518, L1532, L1541, L1546, L1554, L1560, L1571, L1572, L1578, L1579, L1601, L1605, L1609, L1613, L1621, L1645, L1647, L1657, L1660, L1662, L1870, L1885 switched off; switching off L121 crashed the script instead of failing a sample, which does not count as caught.
 
 The unmutated control stayed green every time. Only lines that record a finding, raise, or return a failing exit code
-were broken (the tool's pattern, or the hand-written list); a line number refers to the script as shipped in this version.
+were broken; a line number refers to the script as shipped in this version.
 This shows those lines are covered. It does not show that nothing else can fail.
 
 ## Limits
